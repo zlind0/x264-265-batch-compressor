@@ -1,26 +1,3 @@
-# import asyncio
-# import sys
-# # inp=None
-
-# fileno = sys.stdin.fileno()
-# async def printbuffer(buffer):
-#     if buffer is not None:
-#         sys.stdout.buffer.write(buffer)
-
-# async def main():
-# #     global inp
-#     inp=None
-#     with open(fileno, "rb", closefd=False) as f:
-#         while True:
-#             printb=printbuffer(inp)
-#             inp = f.read(1024*1024*256)
-# #             print("Got",inp)
-#             if not inp: 
-#                 await printb
-#                 break
-#             await printb
-
-# asyncio.run(main())
 import sys
 from threading import Thread
 from time import sleep
