@@ -16,7 +16,7 @@ src = core.std.SetFieldBased(src, 0)
 
 #黑边处理
 # src = core.std.CropRel(src,left=60,right=60,top=0,bottom=0)
-src = core.std.CropRel(src,left=0,right=0,top=140,bottom=140)
+src = core.std.CropRel(src,left=0,right=0,top=280,bottom=280)
 
 # 对Y和UV平面降噪，一般来说只对Y降噪即可，选择性开启。h表示降噪力度。d和a表示时间和空间的降噪精度。, device_id是使用的GPU设备编号，0是第一个，1是第二个，以此类推。可以使用不同的GPU运算，如果有的话。
 # print("Denoise...")
