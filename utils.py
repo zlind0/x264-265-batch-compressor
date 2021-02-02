@@ -1,6 +1,7 @@
 from pymediainfo import MediaInfo
 from datetime import datetime
-import os, requests, json
+import os, requests, json, random, subprocess, base64
+from smms import *
 
 def getmetainfo(doubanid):
     params = (
@@ -60,9 +61,8 @@ def generate_videoinfo(filename, logname="", src=""):
         subtitlefmt=f"{props['codec_id']} : {props['other_language'][0]}({title})"
         subtitledesc+=f"SUBTiTLES.................: {subtitlefmt}\n"
     NEWMOVIE_size=str(round(os.path.getsize(filename) / (1024 * 1024 * 1024), 3)) + ' GB'
-    MOVIE_filename="".join(re.findall(r'([^\\/]*$)', MOVIE))
     RELEASE_filename="".join(re.findall(r"([^\\/]*$)", filename.replace(".mkv","")))
-    if len(src)>0: MOVIE_filename="".join(re.findall(r'([^\\/]*$)', src))
+    MOVIE_filename="".join(re.findall(r'([^\\/]*$)', src))
     
     transcodelog=""
     if len(logname)>0:
@@ -111,7 +111,7 @@ def get_mediainfo(filename):
     nfo=subprocess.check_output(f'mediainfo "{filename}"', shell=True).decode("utf-8")
     return f'[hide][font=Lucida Console]\n{nfo}[/hide]'
     
-def upload_folder(folder,count=6):
+def upload_folder(folder,smms,count=6):
     print("===UPLOAD===")
     picbed=""
     for i in range(count):
@@ -121,27 +121,27 @@ def upload_folder(folder,count=6):
         print(picbed_url)
     return picbed
 
-def get_bbcode(file, src="",logname="",picbed="",metainfo={"format":""}):
+def get_bbcode(file, src="",logname="",picbed="",metainfo={"format":""},ack=""):
     print("Title:", file.replace("."," "))
     
     bbcode='''
 [quote]
 制作说明：
-'''+ACKNOWLEDGEMENT+'''字幕转载务必注意礼节，请保留原作者信息，谢绝二次提取修改！
+'''+ack+'''字幕转载务必注意礼节，请保留原作者信息，谢绝二次提取修改！
 在此感谢各位原作者及分享者！如有侵权请联系删除！
 [/quote]
 '''+f'{metainfo["format"]}\n{generate_videoinfo(file,logname,src=src)}\n{picbed}\n{get_mediainfo(file)}'
     return bbcode
 
-def getbase64json(filename, src, logname, picbed, metainfo, is_remux=False, template={}):
+def getbase64json(filename, src, logname, picbed, metainfo, is_remux=False, template={},tracks="",gz=0,ack=""):
     codec=logname.replace(".log","")
     if codec=="": codec="AVC"
     audiomap={"DTS-HD":19,"TrueHD": 20,"LPCM": 21,"DTS": 3,"AC3": 18,"AAC":6,"FLAC":1,"APE":2,"WAV":22,"Other":7}
 
-    template["small_descr"]="/".join(metainfo["trans_title"]+metainfo["this_title"])+" "+SOUNDTRACK
+    template["small_descr"]="/".join(metainfo["trans_title"]+metainfo["this_title"])+" "+tracks
     template["url"]=metainfo["imdb_link"]
     template["douban_id"]=metainfo["douban_link"]
-    template["descr"]=get_bbcode(filename, src=src, logname="x264.log", picbed=picbed, metainfo=metainfo)
+    template["descr"]=get_bbcode(filename, src=src, logname="x264.log", picbed=picbed, metainfo=metainfo,ack=ack)
     template["medium_sel"]=15 if is_remux is False else 3
     template["codec_sel"]=6 if codec=="x265" else 1
     template["team_sel"]=21
@@ -155,5 +155,5 @@ def getbase64json(filename, src, logname, picbed, metainfo, is_remux=False, temp
     template["gf"]=1
     template["zz"]=1
     template["uplver"]=1
-    template["gz"]=SUBTITLE_GZ
+    template["gz"]=gz
     return base64.encodebytes(json.dumps(template).encode("utf-8")).decode("utf-8")
