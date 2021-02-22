@@ -114,8 +114,10 @@ def get_mediainfo(filename):
 def upload_folder(folder,smms,count=6):
     print("===UPLOAD===")
     picbed=""
-    for i in range(count):
-        imgpath=os.path.join(folder,random.choice(os.listdir(folder)))
+    filenames=os.listdir(folder)
+    random.shuffle(filenames)
+    for f in filenames[0:count]:
+        imgpath=os.path.join(folder,f)
         picbed_url=smms.upload_image(imgpath)
         picbed+=f"[img]{picbed_url}[/img]\n"
         print(picbed_url)
