@@ -67,7 +67,7 @@ def generate_videoinfo(filename, logname="", src=""):
     transcodelog=""
     if len(logname)>0:
         transcodelog=f'.{logname.replace(".log","")}.Info\n'
-        with open(logname) as f:
+        with open(logname,errors='ignore') as f:
             lines=f.readlines()
             for line in lines:
                 if ('[info]' in line or '[libx264' in line) and 'profile' not in line:
@@ -100,11 +100,11 @@ def get_captures(codec, filename):
     ffmpeg_extract_cmd=''
     for i in range(0,12):
         time=f'0{int(i/6)}:{i%6}2'
-        ffmpeg_extract_cmd+=f'ffmpeg -y -ss {time}:00 -i "{filename}" -vframes 1 \
--q:v 2 {os.getcwd()}/{codec}_captures/{codec}_capture_{i*2}.jpg 2>&1 >/dev/null\n'
+        path=os.path.join(os.getcwd(), f"{codec}_captures", f"{codec}_capture_{i*2}.jpg")
+        ffmpeg_extract_cmd+=f'ffmpeg -y -ss {time}:00 -i "{filename}" -vframes 1 -q:v 2 {path}\n'
         time=f'0{int(i/6)}:{i%6}7'
-        ffmpeg_extract_cmd+=f'ffmpeg -y -ss {time}:00 -i "{filename}" -vframes 1 \
--q:v 2 {os.getcwd()}/{codec}_captures/{codec}_capture_{i*2+1}.jpg 2>&1 >/dev/null\n'
+        path=os.path.join(os.getcwd(), f"{codec}_captures", f"{codec}_capture_{i*2+1}.jpg")
+        ffmpeg_extract_cmd+=f'ffmpeg -y -ss {time}:00 -i "{filename}" -vframes 1 -q:v 2 {path}\n'
     return ffmpeg_extract_cmd
     
 def get_mediainfo(filename):
