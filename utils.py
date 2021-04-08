@@ -97,7 +97,7 @@ BIT DEPTH.................: {bit_depth}
 def get_captures(codec, filename):
     if not os.path.exists(f"{codec}_captures"):
         os.mkdir(f"{codec}_captures")
-    ffmpeg_extract_cmd=''
+    ffmpeg_extract_cmd=f"rm -rf {codec}_captures \n mkdir -p {codec}_captures \n"
     for i in range(0,12):
         time=f'0{int(i/6)}:{i%6}2'
         path=os.path.join(os.getcwd(), f"{codec}_captures", f"{codec}_capture_{i*2}.jpg")
