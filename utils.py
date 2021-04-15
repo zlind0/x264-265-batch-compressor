@@ -97,7 +97,10 @@ BIT DEPTH.................: {bit_depth}
 def get_captures(codec, filename):
     if not os.path.exists(f"{codec}_captures"):
         os.mkdir(f"{codec}_captures")
-    ffmpeg_extract_cmd=f"rm -rf {codec}_captures \n mkdir -p {codec}_captures \n"
+    if "\\" in filename:
+        ffmpeg_extract_cmd=f"rmdir /Q /S {codec}_captures\nmkdir {codec}_captures \n"
+    else:
+        ffmpeg_extract_cmd=f"rm -rf {codec}_captures \nrmdir /Q /S {codec}_captures\nmkdir -p {codec}_captures \n"
     for i in range(0,12):
         time=f'0{int(i/6)}:{i%6}2'
         path=os.path.join(os.getcwd(), f"{codec}_captures", f"{codec}_capture_{i*2}.jpg")
@@ -143,7 +146,7 @@ def getbase64json(filename, src, logname, picbed, metainfo, is_remux=False, temp
     template["small_descr"]="/".join(metainfo["trans_title"]+metainfo["this_title"])+" "+tracks
     template["url"]=metainfo["imdb_link"]
     template["douban_id"]=metainfo["douban_link"]
-    template["descr"]=get_bbcode(filename, src=src, logname="x264.log", picbed=picbed, metainfo=metainfo,ack=ack)
+    template["descr"]=get_bbcode(filename, src=src, logname=logname, picbed=picbed, metainfo=metainfo,ack=ack)
     template["medium_sel"]=15 if is_remux is False else 3
     template["codec_sel"]=6 if codec=="x265" else 1
     template["team_sel"]=21
