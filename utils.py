@@ -143,7 +143,7 @@ def getbase64json(filename, src, logname, picbed, metainfo, is_remux=False, temp
     template["small_descr"]="/".join(metainfo["trans_title"]+metainfo["this_title"])+" "+tracks
     template["url"]=metainfo["imdb_link"]
     template["douban_id"]=metainfo["douban_link"]
-    template["descr"]=get_bbcode(filename, src=src, logname="x264.log", picbed=picbed, metainfo=metainfo,ack=ack)
+    template["descr"]=get_bbcode(filename, src=src, logname=logname, picbed=picbed, metainfo=metainfo,ack=ack)
     template["medium_sel"]=15 if is_remux is False else 3
     template["codec_sel"]=6 if codec=="x265" else 1
     template["team_sel"]=21
