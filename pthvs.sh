@@ -1,4 +1,5 @@
 function pthpipe {
+ls|grep -e "[[:digit:]]*.vpy"|xargs rm
 CROP_X=0
 CROP_Y=0
 while [[ $# -gt 0 ]]
@@ -52,8 +53,8 @@ if [ ! -n $SRC ]; then
     >&2 echo "    -cy   Crop value for both top and bottom."
 else
     VPY=$RANDOM.vpy
-    >&2 echo "[VPY]\t/tmp/$VPY"
-    cat <<! >/tmp/$VPY
+    >&2 echo "[VPY]\t$VPY"
+    cat <<! >$VPY
 import vapoursynth as vs
 from vapoursynth import core
 core.num_threads = 2
@@ -65,12 +66,12 @@ $HIBIT
 src.set_output()
 !
     export PYTHONPATH=/usr/local/lib/python3.8/site-packages
-    vspipe -p --y4m /tmp/$VPY -
+    vspipe --y4m $VPY -
 fi
 }
 
 
-function pthx264 {
+function pth264 {
 CRF=17
 QCOMP=0.7
 AQS=0.9
@@ -122,7 +123,7 @@ if [ -n $OUTPUT ]; then
     --me umh  --subme 11 --merange 48 --no-fast-pskip --no-dct-decimate \
     --direct auto --psy-rd 1.00:0.00 --vbv-bufsize 78125 --vbv-maxrate 62500 \
     --deblock -3:-3 --b-adapt 2 --keyint 240 --min-keyint 1 --no-mbtree --trellis 2 \
-    --chroma-qp-offset -1 --rc-lookahead 72 --output $OUTPUT - | tee $LOGFILE
+    --chroma-qp-offset -1 --rc-lookahead 72 --output $OUTPUT - 
 else
     echo "Usage: pthx264 --crf <CRF> --qcomp <QCOMP> --aq-strength <AQS> --output <OUT>"
     echo "Usage: pthx264 -crf <CRF> -qc <QCOMP> -aqs <AQS> -o <OUT>"
@@ -130,7 +131,7 @@ else
 fi
 }
 
-function pthx265 {
+function pth265 {
 CRF=17
 QCOMP=0.7
 AQS=0.9
@@ -182,7 +183,7 @@ if [ -n $OUTPUT ]; then
     --b-adapt 2 --sao --no-limit-sao --selective-sao 4 --me 3 --subme 7 --merange 48 --bframes 8 --keyint 240 \
     --min-keyint 24 --deblock 0:0 --cbqpoffs 0 --crqpoffs 0 --no-strong-intra-smoothing  --no-rect  --no-open-gop \
     --no-amp --pools + --input-depth 10 --stylish  --tu-inter-depth 1 --tu-intra-depth 1 --limit-tu 0 --max-merge 3 \
-    --early-skip --output $OUTPUT - 2>&1 | tee $LOGFILE
+    --early-skip --output $OUTPUT - 
 else
     echo "Usage: pthx265 --crf <CRF> --qcomp <QCOMP> --aq-strength <AQS> --output <OUT>"
     echo "Usage: pthx265 -crf <CRF> -qc <QCOMP> -aqs <AQS> -o <OUT>"
