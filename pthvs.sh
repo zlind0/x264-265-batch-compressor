@@ -1,3 +1,80 @@
+function installvs {
+
+sudo apt install -y autoconf build-essential libtool python3.8-dev cython3
+export VS_INSTALL_DIR=$HOME/.installs
+export MAKEFLAGS=-j
+mkdir -p $VS_INSTALL_DIR
+
+cd $VS_INSTALL_DIR
+git -C l-smash pull || git clone https://github.com/l-smash/l-smash.git
+cd l-smash
+./configure  --prefix=/usr --enable-shared
+make lib $MAKEFLAGS
+sudo make install-lib
+
+cd $VS_INSTALL_DIR
+git -C zimg pull || git clone https://github.com/sekrit-twc/zimg.git
+cd zimg
+./autogen.sh
+./configure --prefix=/usr
+make $MAKEFLAGS
+sudo make install
+
+cd $VS_INSTALL_DIR
+rm ImageMagick.tar.gz
+wget https://www.imagemagick.org/download/ImageMagick.tar.gz
+tar xvzf ImageMagick.tar.gz
+cd ImageMagick*/
+./configure --prefix=/usr
+make $MAKEFLAGS
+sudo make install
+
+cd $VS_INSTALL_DIR
+git -C vapoursynth pull || git clone https://github.com/vapoursynth/vapoursynth.git
+cd vapoursynth
+./autogen.sh
+./configure
+make $MAKEFLAGS
+sudo make install
+sudo ldconfig
+
+cd $VS_INSTALL_DIR
+git -C vapoursynth-plugins pull || git clone https://github.com/darealshinji/vapoursynth-plugins.git
+cd vapoursynth-plugins
+./autogen.sh
+./configure
+make $MAKEFLAGS
+sudo make install
+
+}
+
+function installx264 {
+sudo apt install -y nasm
+X264_INSTALL_DIR=$HOME/.installs
+export MAKEFLAGS=-j
+mkdir -p $X264_INSTALL_DIR
+
+cd $X264_INSTALL_DIR
+git -C x264 pull || git clone https://code.videolan.org/videolan/x264.git x264
+cd x264
+./configure
+make $MAKEFLAGS
+sudo make install
+}
+
+function installx265 {
+sudo apt install -y nasm libnuma-dev cmake
+X265_INSTALL_DIR=$HOME/.installs
+mkdir -p $X265_INSTALL_DIR
+
+cd $X265_INSTALL_DIR
+git -C x265 pull || git clone https://github.com/msg7086/x265-Yuuki-Asuna.git x265
+cd x265/build/linux
+export MAKEFLAGS=-j
+./multilib.sh
+sudo ln -s $PWD/8bit/x265 /usr/local/bin/x265
+}
+
 function pthpipe {
 ls|grep -e "[[:digit:]]*.vpy"|xargs rm
 CROP_X=0
@@ -8,11 +85,12 @@ key="$1"
 case $key in
     -i|--in)
     SRC="$2"
-    >&2 echo "[IN]\t$SRC"
+    >&2 echo -e "[IN]\t$SRC"
     shift
     shift
     ;;
     -10|--10bit)
+    >&2 echo -e "[10bit]"
     HIBIT="src = core.fmtc.bitdepth (src, bits=10)"
     shift
     ;;
@@ -53,7 +131,7 @@ if [ ! -n $SRC ]; then
     >&2 echo "    -cy   Crop value for both top and bottom."
 else
     VPY=$RANDOM.vpy
-    >&2 echo "[VPY]\t$VPY"
+    >&2 echo -e "[VPY]\t$VPY"
     cat <<! >$VPY
 import vapoursynth as vs
 from vapoursynth import core
@@ -82,31 +160,31 @@ key="$1"
 case $key in
     -crf|--crf)
     CRF="$2"
-    >&2 echo "[CRF]\t$CRF"
+    >&2 echo -e "[CRF]\t$CRF"
     shift
     shift
     ;;
     -qc|--qcomp)
     QCOMP="$2"
-    >&2 echo "[QCOMP]\t$QCOMP"
+    >&2 echo -e "[QCOMP]\t$QCOMP"
     shift
     shift
     ;;
     -aqs|--aq-strength)
     AQS="$2"
-    >&2 echo "[AQS]\t$AQS"
+    >&2 echo -e "[AQS]\t$AQS"
     shift
     shift
     ;;
     -log)
     LOGFILE="$2"
-    >&2 echo "[LOG]\t$LOGFILE"
+    >&2 echo -e "[LOG]\t$LOGFILE"
     shift
     shift
     ;;
     -o|--output)
     OUTPUT="$2"
-    >&2 echo "[OUT]\t$OUTPUT"
+    >&2 echo -e "[OUT]\t$OUTPUT"
     shift
     shift
     ;;
@@ -142,31 +220,31 @@ key="$1"
 case $key in
     -crf|--crf)
     CRF="$2"
-    >&2 echo "[CRF]\t$CRF"
+    >&2 echo -e "[CRF]\t$CRF"
     shift
     shift
     ;;
     -qc|--qcomp)
     QCOMP="$2"
-    >&2 echo "[QCOMP]\t$QCOMP"
+    >&2 echo -e "[QCOMP]\t$QCOMP"
     shift
     shift
     ;;
     -aqs|--aq-strength)
     AQS="$2"
-    >&2 echo "[AQS]\t$AQS"
+    >&2 echo -e "[AQS]\t$AQS"
     shift
     shift
     ;;
     -o|--output)
     OUTPUT="$2"
-    >&2 echo "[OUT]\t$OUTPUT"
+    >&2 echo -e "[OUT]\t$OUTPUT"
     shift
     shift
     ;;
     -log)
     LOGFILE="$2"
-    >&2 echo "[LOG]\t$LOGFILE"
+    >&2 echo -e "[LOG]\t$LOGFILE"
     shift
     shift
     ;;
@@ -182,7 +260,7 @@ if [ -n $OUTPUT ]; then
     --rd 4 --psy-rd 2.0 --rdoq-level 0 --psy-rdoq 0  --ref 6 --no-limit-modes --rc-lookahead 24 --b-intra --weightb \
     --b-adapt 2 --sao --no-limit-sao --selective-sao 4 --me 3 --subme 7 --merange 48 --bframes 8 --keyint 240 \
     --min-keyint 24 --deblock 0:0 --cbqpoffs 0 --crqpoffs 0 --no-strong-intra-smoothing  --no-rect  --no-open-gop \
-    --no-amp --pools + --input-depth 10 --stylish  --tu-inter-depth 1 --tu-intra-depth 1 --limit-tu 0 --max-merge 3 \
+    --no-amp --pools + --input-depth 10 --tu-inter-depth 1 --tu-intra-depth 1 --limit-tu 0 --max-merge 3 \
     --early-skip --output $OUTPUT - 
 else
     echo "Usage: pthx265 --crf <CRF> --qcomp <QCOMP> --aq-strength <AQS> --output <OUT>"
