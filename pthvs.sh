@@ -76,7 +76,7 @@ sudo ln -s $PWD/8bit/x265 /usr/local/bin/x265
 }
 
 function pthpipe {
-ls|grep -e "[[:digit:]]*.vpy"|xargs rm
+ls|grep -e "^tmp_[[:digit:]]*.vpy"|xargs rm
 CROP_X=0
 CROP_Y=0
 while [[ $# -gt 0 ]]
@@ -85,7 +85,7 @@ key="$1"
 case $key in
     -i|--in)
     SRC="$2"
-    >&2 echo -e "[IN]\t$SRC"
+    
     shift
     shift
     ;;
@@ -111,7 +111,7 @@ src = awsf.SelectRangeEvery(clip=src, every=3000, length=50, offset=10000)
     shift
     ;;
     --extra)
-    EXTRA="$2"
+    EXTRA="$(cat $2)"
     shift
     shift
     ;;
@@ -121,8 +121,8 @@ src = awsf.SelectRangeEvery(clip=src, every=3000, length=50, offset=10000)
     ;;
 esac
 done
-
-if [ ! -n $SRC ]; then
+>&2 echo -e "[IN]\t$SRC"
+if [[ ! -n "$SRC" ]]; then
     >&2 echo "Usage: pthvspipe -i <SOURCE_MKV>     | x264"
     >&2 echo "       pthvspipe -i <SOURCE_MKV> -10 | x265"
     >&2 echo "Other args:"
@@ -130,7 +130,7 @@ if [ ! -n $SRC ]; then
     >&2 echo "    -cx   Crop value for both left and right."
     >&2 echo "    -cy   Crop value for both top and bottom."
 else
-    VPY=$RANDOM.vpy
+    VPY=tmp_$RANDOM.vpy
     >&2 echo -e "[VPY]\t$VPY"
     cat <<! >$VPY
 import vapoursynth as vs
@@ -141,6 +141,7 @@ src = core.lsmas.LWLibavSource(source=r"$SRC",fpsnum=0,fpsden=1,decoder="")
 src = core.std.CropRel(src,left=$CROP_X,right=$CROP_X,top=$CROP_Y,bottom=$CROP_Y)
 $TEST
 $HIBIT
+$EXTRA
 src.set_output()
 !
     export PYTHONPATH=/usr/local/lib/python3.8/site-packages
@@ -195,7 +196,7 @@ case $key in
 esac
 done
 
-if [ -n $OUTPUT ]; then
+if [[ -n "$OUTPUT" ]]; then
     x264 --demuxer y4m --preset slower --profile high --level 4.1 --ref 4 \
     --crf $CRF --qcomp $QCOMP --aq-mode 3 --aq-strength $AQS --bframes 11 \
     --me umh  --subme 11 --merange 48 --no-fast-pskip --no-dct-decimate \
@@ -255,8 +256,8 @@ case $key in
 esac
 done
 
-if [ -n $OUTPUT ]; then
-    x265 --y4m -D 10 --preset slower --aud --repeat-headers  --crf 17.0 --qcomp 0.7 --aq-mode 3 --aq-strength 0.9 \
+if [[ -n "$OUTPUT" ]]; then
+    x265 --y4m -D 10 --preset slower --aud --repeat-headers  --crf $CRF --qcomp $QCOMP --aq-mode 3 --aq-strength $AQS \
     --rd 4 --psy-rd 2.0 --rdoq-level 0 --psy-rdoq 0  --ref 6 --no-limit-modes --rc-lookahead 24 --b-intra --weightb \
     --b-adapt 2 --sao --no-limit-sao --selective-sao 4 --me 3 --subme 7 --merange 48 --bframes 8 --keyint 240 \
     --min-keyint 24 --deblock 0:0 --cbqpoffs 0 --crqpoffs 0 --no-strong-intra-smoothing  --no-rect  --no-open-gop \
@@ -267,4 +268,9 @@ else
     echo "Usage: pthx265 -crf <CRF> -qc <QCOMP> -aqs <AQS> -o <OUT>"
     echo "Default: -crf=17 -qc=0.7 -aqs=0.9"
 fi
+}
+
+
+function pthmux {
+    
 }
