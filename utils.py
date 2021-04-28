@@ -94,16 +94,14 @@ BIT DEPTH.................: {bit_depth}
 {transcodelog}[/quote]'''
     return release_info
     
-def get_captures(codec, filename):
-    if not os.path.exists(f"{codec}_captures"):
-        os.mkdir(f"{codec}_captures")
-    ffmpeg_extract_cmd=f"rm -rf {codec}_captures \n mkdir -p {codec}_captures \n"
+def get_captures(codec_dirname, filename):
+    ffmpeg_extract_cmd=f"rm -rf {codec_dirname}\nmkdir -p {codec_dirname} \n"
     for i in range(0,12):
         time=f'0{int(i/6)}:{i%6}2'
-        path=os.path.join(os.getcwd(), f"{codec}_captures", f"{codec}_capture_{i*2}.jpg")
+        path=os.path.join(f"{codec_dirname}", f"{i*2}.jpg")
         ffmpeg_extract_cmd+=f'ffmpeg -y -ss {time}:00 -i "{filename}" -vframes 1 -q:v 2 {path}\n'
         time=f'0{int(i/6)}:{i%6}7'
-        path=os.path.join(os.getcwd(), f"{codec}_captures", f"{codec}_capture_{i*2+1}.jpg")
+        path=os.path.join(f"{codec_dirname}", f"{i*2+1}.jpg")
         ffmpeg_extract_cmd+=f'ffmpeg -y -ss {time}:00 -i "{filename}" -vframes 1 -q:v 2 {path}\n'
     return ffmpeg_extract_cmd
     
