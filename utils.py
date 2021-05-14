@@ -135,6 +135,7 @@ def get_bbcode(file, src="",logname="",picbed="",metainfo={"format":""},ack=""):
 
 def getbase64json(filename, src, logname, picbed, metainfo, is_remux=False, template={},tracks="",gz=0,ack=""):
     codec=logname.replace(".log","")
+    if is_remux: logname=""
     if codec=="": codec="AVC"
     audiomap={"DTS-HD":19,"TrueHD": 20,"LPCM": 21,"DTS": 3,"AC3": 18,"AAC":6,"FLAC":1,"APE":2,"WAV":22,"Other":7}
 
