@@ -269,8 +269,3 @@ else
     echo "Default: -crf=17 -qc=0.7 -aqs=0.9"
 fi
 }
-
-
-function pthmux {
-    
-}
