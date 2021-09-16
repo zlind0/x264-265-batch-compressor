@@ -7,7 +7,7 @@ def getmetainfo(doubanid):
     params = (
         ('url', f'https://movie.douban.com/subject/{doubanid}'),
     )
-    response = requests.get('https://api.rhilip.info/tool/movieinfo/gen', params=params)
+    response = requests.get('https://ptgen.hzlclock.workers.dev/', params=params)
     metainfo=json.loads(response.content.decode("utf-8"))
     return metainfo
 class nullabledict:
