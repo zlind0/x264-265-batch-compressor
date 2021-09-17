@@ -1,6 +1,6 @@
 function installvs {
 
-sudo apt install -y autoconf build-essential libtool python3.8-dev cython3
+sudo apt install -y git autoconf build-essential libtool python3.8-dev cython3 wget
 export VS_INSTALL_DIR=$HOME/.installs
 export MAKEFLAGS=-j
 mkdir -p $VS_INSTALL_DIR
